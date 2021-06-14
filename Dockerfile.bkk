@@ -1,0 +1,34 @@
+FROM node:latest
+
+# Install app dependencies
+WORKDIR /src
+RUN npm install -g gulp
+COPY package.json /src/package.json
+RUN cd /src; yarn install
+
+# Bundle app source
+COPY . /src
+
+EXPOSE  3000
+CMD ["gulp", "serve"]
+
+
+
+FROM nginx:latest
+
+RUN apt-get update && apt-get install -y \
+    vim \
+    npm 
+RUN npm install -g gulp
+RUN npm install gulp
+RUN npm install -g yarn
+RUN npm install yarn
+
+WORKDIR ./
+# copy both 'package.json' and 'package-lock.json' (if available)
+ADD . ./
+RUN yarn install
+RUN gulp
+
+ADD ./src /usr/share/nginx/html
+EXPOSE 80
